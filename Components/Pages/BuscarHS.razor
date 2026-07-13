@@ -1,0 +1,182 @@
+﻿@page "/buscar"
+@using SistemaDeServicios.Modelos
+@using SistemaDeServicios.Data
+@inject HojaServicioService hojaServicioService
+@inject DireccionesService direccionessService
+@inject TipoServicioService tipoServiciosService
+@inject EtiquetasService etiquetasService
+
+
+<PageTitle>Búsqueda De Hojas</PageTitle>
+
+<h1><strong>Búsqueda De Hoja De Servicio</strong></h1>
+
+<div class="grid-filtro">
+    <div class="celda-filtro">
+        <h4>Buscar por ID</h4>
+
+        <div class="flex">
+            <label>Id:</label>
+            <input type="number" class="id-cont" min="1" max="@max" @bind-value="idBusqueda"/> 
+
+            <button type="button" class="boton buscar" @onclick="BusquedaId">🔎</button>
+        </div>
+    </div>
+
+    <div class="celda-filtro">
+        <h4>Buscar por filtro</h4>
+
+        <div class="flex">
+            <label>Fecha:</label>
+            <input type="date" class="date" @bind-value="fechaBusquedaIni"/>
+            <label><strong>-</strong></label>
+            <input type="date" class="date" @bind-value="fechaBusquedaFin" />
+
+            <InputSelect class="select" @bind-Value="direccionBusqueda">
+               <option value="!">Todas las direcciones</option>
+			    @foreach (var direccion in ListaDirecciones)
+			    {
+				    <option value="@direccion.NombreDir">@direccion.NombreDir</option>
+			    }
+            </InputSelect>
+
+            <button type="button" class="boton buscar" @onclick="BusquedaFiltro">🔎</button>
+        </div>
+    </div>
+
+</div> 
+
+@if (hojaEncontrada)
+{
+    @if (hojaValida)
+    {
+        <div class="grid-hoja">
+            <div class="fila">
+                <label class="celda"><strong>ID:</strong> @HojasServicio[i].Id</label>
+                <label class="celda"><strong>Fecha:</strong> @HojasServicio[i].Fecha.Day/@HojasServicio[i].Fecha.Month/@HojasServicio[i].Fecha.Year</label>
+                <label class="celda"><strong>Nombre:</strong> @HojasServicio[i].Nombre</label>
+                <label class="celda"><strong>Usuario:</strong> @HojasServicio[i].Usuario</label>
+            </div>
+
+            <div class="fila">
+                <label class="celda"><strong>Dirección:</strong> @HojasServicio[i].Direccion</label>
+                <label class="celda"><strong>Departamento:</strong> @HojasServicio[i].Departamento</label>
+                <label class="celda"><strong>Equipo:</strong> @HojasServicio[i].Caracteristicas</label>
+            </div>
+
+            <div class="celda">
+                <div class="flex">
+                    <label class="centrar"><strong>Tipo De Servicio</strong></label>
+                </div>
+                <div class="grid-servs">
+                    @foreach (var servicios in HojasServicio[i].Servicios)
+                    {
+                        @if (servicios.Recurrente)
+                        {
+                            <label>◈ @servicios.Texto</label>
+                        }
+                        else
+                        {
+                            <label>◈ Otro: @servicios.Texto</label>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="fila">
+                <label class="celda"><strong>Descripción:</strong> @HojasServicio[i].Descripcion</label>
+
+                <label class="celda"><strong>Sugerencias Técnicas:</strong> @HojasServicio[i].Sugerencias</label>
+            </div>
+        </div>
+
+        <div class="grid-menu">
+            <button class="boton boton-lista" type="button" disabled=@(i == 0) @onclick="IrPrincipio">(1)</button>
+            <button class="boton boton-lista" type="button" disabled=@(i == 0) @onclick="AnteriorHoja">←</button>
+            <label class="numero">@(i + 1) / @HojasServicio.Count</label>
+            <button class="boton boton-lista" type="button" disabled=@(i == HojasServicio.Count - 1) @onclick="SiguienteHoja">→</button>
+            <button class="boton boton-lista" type="button" disabled=@(i == HojasServicio.Count - 1) @onclick="IrFinal">(@HojasServicio.Count)</button>
+            <button class="boton pdf" type="button" @onclick="RecrearPDF">Recrear PDF</button>
+        </div>
+    }
+    else
+    {
+        <h2 class="centrar"><strong>No se encontraron hojas</strong></h2>
+    }
+}
+else
+{
+    <h2 class="centrar"><strong>Las hojas se mostrarán aquí</strong></h2>
+}
+
+@code {
+    bool hojaEncontrada = false, hojaValida = false;
+    private int idBusqueda = 0, i = 0, max = 1;
+    DateTime fechaBusquedaIni = DateTime.Now, fechaBusquedaFin = DateTime.Now;
+    private string direccionBusqueda = "!";
+    HojaServicio Hoja = new();
+    List<HojaServicio> HojasServicio = new List<HojaServicio>();
+    List<Direcciones> ListaDirecciones = new List<Direcciones>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        max = await hojaServicioService.ContarHojas();
+        ListaDirecciones = await direccionessService.ObtenerDirecciones();
+    }
+
+    private async Task BusquedaId()
+    {
+        Hoja = await hojaServicioService.ObtenerHoja(idBusqueda);
+        hojaEncontrada = true;
+        if (Hoja == null)
+        {
+            hojaValida = false;
+            return;
+        }
+        HojasServicio.Clear();
+        HojasServicio.Add(Hoja);
+        hojaValida = true;
+        i = 0;
+    }
+
+    private async Task BusquedaFiltro()
+    {
+        var lista = await hojaServicioService.ObtenerHojasPorFiltro(fechaBusquedaIni, fechaBusquedaFin, direccionBusqueda);
+        hojaEncontrada = true;
+        if (!lista.Any())
+        {
+            hojaValida = false;
+            return;
+        }
+        HojasServicio.Clear();
+        HojasServicio.AddRange(lista);
+        hojaValida = true;
+        i = 0;
+    }
+
+    private void IrPrincipio()
+    {
+        i = 0;
+    }
+
+    private void AnteriorHoja()
+    {
+        i--;
+    }
+
+    private void SiguienteHoja()
+    {
+        i++;
+    }
+
+    private void IrFinal()
+    {
+        i = HojasServicio.Count - 1;
+    }
+
+    private async Task RecrearPDF()
+    {
+        var hoja = HojasServicio[i];
+        Task.Run(async () => { await hojaServicioService.GenerarPdf(hoja, tipoServiciosService.ObtenerTiposServicioFiltrados().Result); });
+    }
+}

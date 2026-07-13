@@ -1,0 +1,409 @@
+﻿@page "/estadisticas"
+@using SistemaDeServicios.Modelos
+@using SistemaDeServicios.Data
+@inject HojaServicioService hojaServicioService
+@inject EtiquetasService etiquetasService
+
+<PageTitle>Estadísticas y conteo</PageTitle>
+
+@if (MostrarLista)
+{
+	<h1><strong>Clasificación Y Conteo De Hojas</strong></h1>
+
+	<div class="filtro-grid">
+		<div class="filtro">
+			<div class="celda-filtro">
+				<label>Filtrar hojas de servicio</label>
+				<div class="filtro-grid-textos">
+					<label>Desde</label>
+					<input class="mes" type="number" @bind-value="mesini" min="1" max="12"/>
+					<label>/</label>
+					<input class="ano" type="number" @bind-value="anoini" min="2026" />
+
+					<label>hasta</label>
+					<input class="mes" type="number" @bind-value="mesfin" min="1" max="12" />
+					<label>/</label>
+					<input class="ano" type="number" @bind-value="anofin" min="2026" />
+				</div>
+			</div>
+
+			<div class="filtro-grid-botones">
+				<button type="button" @onclick="ObtenerHojas">Buscar todas</button>
+				<button type="button" @onclick="ObtenerHojasPendientes">Buscar pendientes</button>
+				<button class="boton-sum" type="button" @onclick="SumarizarEtiquetas">Sumarizar etiquetas</button>
+			</div>
+		</div>
+
+		<div class="calendario">
+			<div class="calendario-grid">
+				@if (EstadoMeses.Count == 12)
+				{
+					<button class="mes-celda @EstadoMes(1)" type="button" @onclick="() => ObtenerHojasMensual(1)">Ene</button>
+					<button class="mes-celda @EstadoMes(2)" type="button" @onclick="() => ObtenerHojasMensual(2)">Feb</button>
+					<button class="mes-celda @EstadoMes(3)" type="button" @onclick="() => ObtenerHojasMensual(3)">Mar</button>
+					<button class="mes-celda @EstadoMes(4)" type="button" @onclick="() => ObtenerHojasMensual(4)">Abr</button>
+					<button class="mes-celda @EstadoMes(5)" type="button" @onclick="() => ObtenerHojasMensual(5)">May</button>
+					<button class="mes-celda @EstadoMes(6)" type="button" @onclick="() => ObtenerHojasMensual(6)">Jun</button>
+					<button class="mes-celda @EstadoMes(7)" type="button" @onclick="() => ObtenerHojasMensual(7)">Jul</button>
+					<button class="mes-celda @EstadoMes(8)" type="button" @onclick="() => ObtenerHojasMensual(8)">Ago</button>
+					<button class="mes-celda @EstadoMes(9)" type="button" @onclick="() => ObtenerHojasMensual(9)">Sep</button>
+					<button class="mes-celda @EstadoMes(10)" type="button" @onclick="() => ObtenerHojasMensual(10)">Oct</button>
+					<button class="mes-celda @EstadoMes(11)" type="button" @onclick="() => ObtenerHojasMensual(11)">Nov</button>
+					<button class="mes-celda @EstadoMes(12)" type="button" @onclick="() => ObtenerHojasMensual(12)">Dic</button>
+				}
+			</div>
+		</div>
+	</div>
+
+	<form>
+
+
+		@if (HojasMes.Count > 0)
+		{
+			<div class="layout">
+
+				<div class="registro-main">
+					<div class="celda centrar">
+						<label><strong>Dirección:</strong></label>
+						<label>@HojasMes[i].Direccion</label>
+					</div>
+
+					<div class="registro-secundario">
+						<div class="grid-servs celda">
+							<label class="centrar"><strong>Servicios</strong></label>
+							@foreach (var servicio in HojasMes[i].Servicios)
+							{
+								@if (servicio.Recurrente)
+								{
+									<label>◈ @servicio.Texto</label>
+								}
+								else
+								{
+									<label>◈ Otro: @servicio.Texto</label>
+								}
+							}
+						</div>
+
+						<div class="celda">
+							<p class="centrar"><strong>Descripción</strong></p>
+							<p>@HojasMes[i].Descripcion</p>
+						</div>
+					</div>
+				</div>
+
+				@if (HojasMes[i].Etiquetas.Any() || EtiquetasDeHojas[HojasMes[i]].Any())
+				{
+					<label class="sub-titulo">Conjunto de etiquetas asignadas</label>
+
+					<div class="grid-etiquetas">
+						@foreach (var etiqueta in HojasMes[i].Etiquetas)
+						{
+							<label class="etiqueta">@etiqueta.Texto</label>
+						}
+					</div>
+
+					<label class="sub-titulo">Nuevo conjunto de etiquetas</label>
+
+					<div class="grid-etiquetas">
+						@foreach (var etiqueta in EtiquetasDeHojas[HojasMes[i]])
+						{
+							<label class="etiqueta etiqueta-memoria">@etiqueta.Texto</label>
+						}
+					</div>
+				}
+				else
+				{
+					<label class="sub-titulo">Sin etiquetas asignadas </label>
+				}
+
+				<div class="grid-menu">
+					<div class="grid-acciones">
+						<InputSelect class="lista-etiquetas" @bind-Value="etiquetaPivote">
+							<option value="-1" >Seleccionar etiqueta</option>
+							@foreach (var etiqueta in Etiquetas)
+							{
+								<option value="@etiqueta.Id">@etiqueta.Texto</option>
+							}
+						</InputSelect>
+						<button class="boton-etiquetado" type="button" @onclick="() => AgregarEtiqueta(HojasMes[i], etiquetaPivote)">+</button>
+						<button class="boton-etiquetado boton-etiquetado2" type="button" @onclick="() => LimpiarEtiquetas(HojasMes[i])">🗑️</button>
+					</div>
+
+
+					<div class="grid-listado">
+						<button class="boton boton-lista" type="button" disabled=@(i == 0) @onclick="IrPrincipio">(1)</button>
+						<button class="boton boton-lista" type="button" disabled=@(i == 0) @onclick="AnteriorHoja">←</button>
+						<label class="numero">@(i + 1) / @HojasMes.Count</label>
+						<button class="boton boton-lista" type="button" disabled=@(i == HojasMes.Count - 1) @onclick="SiguienteHoja">→</button>
+						<button class="boton boton-lista" type="button" disabled=@(i == HojasMes.Count - 1) @onclick="IrFinal">(@HojasMes.Count)</button>
+					</div>
+
+					<button class="boton" type="button" @onclick="ContarEtiquetas">Ver resultados</button>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="flex">
+				<label class="centrar label-no-encontrado">No se encontraron hojas</label>
+			</div>
+		}
+	</form>
+}
+else
+{
+	<h1><strong>Estadísticas Numéricas De Hojas</strong></h1>
+
+	@foreach (var dir in EtiquetasConteo)
+	{
+		<div class="seccion-lista">
+			<h4 class="direccion">@dir.Key</h4>
+			<ul class="lista-etiquetas">
+				@foreach (var etiqueta in dir.Value)
+				{
+					<li>@etiqueta.Key: @etiqueta.Value</li>
+				}
+			</ul>
+		</div>
+	}
+	<div class="contenedor-flex">
+		<button class="boton-volver" @onclick="Volver">Volver a la lista</button>
+	</div>
+}
+
+@code {
+	int mesini = DateTime.Now.Month, mesfin = DateTime.Now.Month, anoini = DateTime.Now.Year, anofin = DateTime.Now.Year;
+	bool MostrarLista = true, MostrarSumatoria = false;
+	int i = 0;
+	int etiquetaPivote = -1;
+	List<HojaServicio> HojasMes = new List<HojaServicio>();
+	List<Etiqueta> Etiquetas = new List<Etiqueta>();
+	Dictionary<HojaServicio, List<Etiqueta>> EtiquetasDeHojas = new();
+	Dictionary<int, string> EstadoMeses = new();
+	Dictionary<string, Dictionary<string, int>> EtiquetasConteo = new();
+	List<int> RevisarHojas = new();
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		HojasMes = await hojaServicioService.ObtenerHojasMensual(mesfin, anofin);
+		Etiquetas = await etiquetasService.ObtenerEtiquetas();
+		await CrearDiccionarioEtiquetas();
+		for (int mes = 1; mes <= 12; mes++)
+		{
+			EstadoMeses[mes] = await CalcularEstadoMes(mes);
+		}
+	}
+
+	private async Task CrearDiccionarioEtiquetas()
+	{
+		EtiquetasDeHojas.Clear();
+		foreach (var hoja in HojasMes)
+		{
+			EtiquetasDeHojas[hoja] = hoja.Etiquetas
+			.Select(e => new Etiqueta { Id = e.Id, Texto = e.Texto })
+			.ToList();
+		}
+	}
+
+	private async Task AgregarEtiqueta(HojaServicio hoja, int etiqueta)
+	{
+		if (etiqueta != -1)
+		{
+			EtiquetasDeHojas[hoja].Add(Etiquetas.FirstOrDefault(e => e.Id == etiqueta));
+		}
+	}
+
+	private async Task LimpiarEtiquetas(HojaServicio hoja)
+	{
+		EtiquetasDeHojas[hoja].Clear();
+	}
+
+	// Busca el estado del mes
+	private string EstadoMes(int m)
+	{
+		if (DateTime.Now.Month == m)
+			return "mes-actual";
+
+		if (DateTime.Now.Month < m)
+			return "mes-futuro";
+
+		return EstadoMeses[m];
+	}
+
+	// Calcula el estado del mes
+	private async Task<string> CalcularEstadoMes(int m)
+	{
+		if (DateTime.Now.Month == m)
+		{
+			return "mes-actual";
+		}
+		if (DateTime.Now.Month < m)
+		{
+			return "mes-futuro";
+		}
+
+		switch (await hojaServicioService.RevisarConteo(m))
+		{
+			case 0:
+				return "mes-pendiente";
+			case 1:
+				return "mes-incompleto";
+			default:
+				return "mes-completo";
+		}
+	}
+
+	// Determina si el registro es par o impar
+	private string ParOImpar(int n) => n % 2 == 0 ? "par" : "impar";
+
+	// Obtiene las hojas de servicio según el rango de meses y años ingresados
+	private async Task ObtenerHojas()
+	{
+		HojasMes = await hojaServicioService.ObtenerHojas(mesini, mesfin, anoini, anofin);
+		i = 0;
+		await CrearDiccionarioEtiquetas();
+	}
+
+	// Obtiene las hojas de servicio pendientes según el rango de meses y años ingresadoss
+	private async Task ObtenerHojasPendientes()
+	{
+		HojasMes = await hojaServicioService.ObtenerHojasPendientes(mesini, mesfin, anoini, anofin);
+		i = 0;
+		await CrearDiccionarioEtiquetas();
+	}
+
+	// Obtiene las hojas de servicio de un mes específico
+	private async Task ObtenerHojasMensual(int m)
+	{
+		mesfin = m;
+		anofin = DateTime.Now.Year;
+		HojasMes = await hojaServicioService.ObtenerHojasMensual(mesfin, anofin);
+		i = 0;
+		await CrearDiccionarioEtiquetas();
+	}
+
+	// Asigna el indice del listado al inicio
+	private void IrPrincipio()
+	{
+		i = 0;
+	}
+
+	//Disminuye el indice del listado
+	private void AnteriorHoja()
+	{
+		if (i > 0)
+			i--;
+	}
+
+	// Aumenta el indice del listado
+	private void SiguienteHoja()
+	{
+		if (i < HojasMes.Count - 1)
+			i++;
+	}
+
+	// Asigna el indice del listado al final
+	private void IrFinal()
+	{
+		i = HojasMes.Count - 1;
+	}
+
+	// Asigna las etiquetas seleccionadas a cada hoja de servicio y las actualiza en la base de datos
+	private async Task EtiquetarHojas()
+	{
+		foreach (var hoja in HojasMes)
+		{
+			var ids = EtiquetasDeHojas[hoja].Select(e => e.Id).ToList();
+
+			hoja.Etiquetas = Etiquetas
+				.Where(e => ids.Contains(e.Id))
+				.ToList();
+			await hojaServicioService.Modificar(hoja);
+		}
+	}
+
+	// Cuenta las hojas de servicio por dirección y etiqueta, y muestra los resultados en una lista
+	private async Task ContarEtiquetas()
+	{
+		await EtiquetarHojas();
+		EtiquetasConteo.Clear();
+		EtiquetasConteo.Add("Pendientes", new Dictionary<string, int>());
+		EtiquetasConteo["Pendientes"].Add("Sin etiquetar", 0);
+		EtiquetasConteo["Pendientes"].Add("Etiqueta perdida", 0);
+		foreach (var hoja in HojasMes)
+		{
+			if (hoja.Etiquetas.Count == 0)
+			{
+				EtiquetasConteo["Pendientes"]["Sin etiquetar"]++;
+				continue;
+			}
+
+			if (!EtiquetasConteo.ContainsKey(hoja.Direccion))
+				EtiquetasConteo[hoja.Direccion] = new();
+
+			foreach (var etiqueta in hoja.Etiquetas)
+			{
+				if (etiqueta.Texto == "--")
+				{
+					EtiquetasConteo["Pendientes"]["Etiqueta perdida"]++;
+					continue;
+				}
+				if (EtiquetasConteo[hoja.Direccion].ContainsKey(etiqueta.Texto))
+				{
+					EtiquetasConteo[hoja.Direccion][etiqueta.Texto]++;
+				}
+				else
+				{
+					EtiquetasConteo[hoja.Direccion][etiqueta.Texto] = 1;
+				}
+			}
+		}
+		MostrarLista = false;
+	}
+
+	// Bool para mostrar el botón para volver a la lista de hojas de servicio
+	private void Volver()
+	{
+		MostrarLista = true;
+	}
+
+	// [Top: I] cuenta las hojas de servicio por dirección y etiqueta para todas las hojas del año actual, y muestra los resultados en una lista
+	private async Task SumarizarEtiquetas()
+	{
+		await EtiquetarHojas();
+		EtiquetasConteo.Clear();
+		EtiquetasConteo.Add("Pendientes", new Dictionary<string, int>());
+		EtiquetasConteo["Pendientes"].Add("Sin etiquetar", 0);
+		EtiquetasConteo["Pendientes"].Add("Etiqueta perdida", 0);
+		foreach (var hoja in await hojaServicioService.ObtenerHojas(1, 12, DateTime.Now.Year, DateTime.Now.Year))
+		{
+			if (hoja.Etiquetas.Count == 0)
+			{
+				EtiquetasConteo["Pendientes"]["Sin etiquetar"]++;
+				continue;
+			}
+
+			if (!EtiquetasConteo.ContainsKey(hoja.Direccion))
+				EtiquetasConteo[hoja.Direccion] = new();
+
+			foreach (var etiqueta in hoja.Etiquetas)
+			{
+				if (etiqueta.Texto == "--")
+				{
+					EtiquetasConteo["Pendientes"]["Etiqueta perdida"]++;
+					continue;
+				}
+				if (EtiquetasConteo[hoja.Direccion].ContainsKey(etiqueta.Texto))
+				{
+					EtiquetasConteo[hoja.Direccion][etiqueta.Texto]++;
+				}
+				else
+				{
+					EtiquetasConteo[hoja.Direccion][etiqueta.Texto] = 1;
+				}
+			}
+		}
+		MostrarLista = false;
+	}
+}

@@ -1,0 +1,196 @@
+﻿@page "/datos"
+@using SistemaDeServicios.Modelos
+@using SistemaDeServicios.Data
+@inject EtiquetasService etiquetasService
+@inject DireccionesService direccionesService
+@inject DepartamentosService departamentosService
+@inject UsuariosService usuariosService
+
+<PageTitle>Gestión BDD</PageTitle>
+
+<h1><strong>Gestionar Información De La Base De Datos</strong></h1>
+
+
+<div class="grid-main">
+
+	<div class="elemento seccion">
+		<h4><strong>Nuevo departamento</strong></h4>
+		<InputSelect @bind-Value="Direcciones[0]" placeholder="Dirección">
+			<option value=" ">Seleccione una dirección</option>
+			@foreach (var direccion in ListaDirecciones)
+			{
+				<option value="@direccion.Id">@direccion.NombreDir</option>
+			}
+		</InputSelect>
+		<input class="campo" type="text" @bind-value="Departamentos[0]" placeholder="Nombre del departamento">
+		<button class="boton" type="button" @onclick="AgregarDepartamento" disabled="@(datosDep)">Guardar</button>
+	</div>
+
+
+	<div class="elemento seccion">
+		<h4><strong>Nuevo usuario</strong></h4>
+		<InputSelect @bind-Value="Direcciones[2]" placeholder="Dirección">
+			<option value=" ">Seleccione una dirección</option>
+			@foreach (var direccion in ListaDirecciones)
+			{
+				<option value="@direccion.Id">@direccion.NombreDir</option>
+			}
+		</InputSelect>
+		<input class="campo" type="text" @bind-value="Usuarios[0]" placeholder="Nombre del usuario">
+		<button class="boton" type="button" @onclick="AgregarUsuario" disabled="@(datosUsu)">Guardar</button>
+	</div>
+
+
+	<div class="elemento seccion">
+		<h4><strong>Nueva etiqueta</strong></h4>
+		<input class="campo" type="text" @bind-value="Etiquetas[0]" placeholder="Texto de la etiqueta" />
+		<button class="boton" type="button" @onclick="AgregarEtiqueta" disabled="@(!datosEtiq)">Guardar</button>
+	</div>
+</div>
+
+<div class="grid-main">
+
+	<div class="elemento seccion">
+		<h4><strong>Editar departamento</strong></h4>
+		<InputSelect @bind-Value="Departamentos[1]" placeholder="Departamento a modificar">
+			<option value=" ">Departamento a modificar</option>
+			@foreach (var departamento in ListaDepartamentos)
+			{
+				<option value="@departamento.NombreDep">@departamento.NombreDep</option>
+			}
+		</InputSelect>
+		<InputSelect @bind-Value="Direcciones[1]" placeholder="Nueva dirección">
+			<option value=" ">Nueva dirección</option>
+			@foreach (var direccion in ListaDirecciones)
+			{
+				<option value="@direccion.Id">@direccion.NombreDir</option>
+			}
+		</InputSelect>
+		<input class="campo" type="text" @bind-value="Departamentos[2]" placeholder="Nuevo nombre del departamento">
+		<button class="boton" type="button" @onclick="EditarDepartamento" disabled="@(datosDepEdit)">Guardar</button>
+	</div>
+
+
+	<div class="elemento seccion">
+		<h4><strong>Editar usuario</strong></h4>
+		<InputSelect @bind-Value="Usuarios[1]" placeholder="Usuario a modificar">
+			<option value=" ">Usuario a modificar</option>
+			@foreach (var usuario in ListaUsuarios)
+			{
+				<option value="@usuario.User">@usuario.User</option>
+			}
+		</InputSelect>
+		<InputSelect @bind-Value="Direcciones[3]" placeholder="Nueva dirección">
+			<option value=" ">Nueva dirección</option>
+			@foreach (var direccion in ListaDirecciones)
+			{
+				<option value="@direccion.Id">@direccion.NombreDir</option>
+			}
+		</InputSelect>
+		<input class="campo" type="text" @bind-value="Usuarios[2]" placeholder="Nuevo nombre del usuario">
+		<button class="boton" type="button" @onclick="EditarUsuario" disabled="@(datosUsuEdit)">Guardar</button>
+	</div>
+
+
+	<div class="elemento seccion">
+		<h4><strong>Editar etiqueta</strong></h4>
+		<InputSelect @bind-Value="Etiquetas[1]" placeholder="Etiqueta a modificar">
+			<option value=" ">Etiqueta a modificar</option>
+			@foreach (var etiqueta in ListaEtiquetas)
+			{
+				<option value="@etiqueta.Texto">@etiqueta.Texto</option>
+			}
+			</InputSelect>
+		<input class="campo" type="text" @bind-value="Etiquetas[2]" placeholder="Nuevo texto de la etiqueta" />
+		<button class="boton" type="button" @onclick="EditarEtiqueta" disabled="@(!datosEtiqEdit)">Guardar</button>
+	</div>
+</div>
+
+
+@code {
+	// 0: Nuevo  1: Seleccion de edicion  2: Cambio a editar
+	int[] Direcciones = { -1, -1, -1, -1 };
+	string[] Etiquetas = { "", "", "" };
+	string[] Departamentos = { "", "", "" };
+	string[] Usuarios = { "", "", "" };
+	List<Direcciones> ListaDirecciones = new();
+	List<Departamentos> ListaDepartamentos = new();
+	List<Usuarios> ListaUsuarios = new();
+	List<Etiqueta> ListaEtiquetas = new();
+	bool confirmar = false;
+
+	private bool datosDep => string.IsNullOrWhiteSpace(Departamentos[0]) || (Direcciones[0] == -1);
+	private bool datosDepEdit => string.IsNullOrWhiteSpace(Departamentos[1]) || (Direcciones[1] == -1) || string.IsNullOrWhiteSpace(Departamentos[2]);
+	private bool datosUsu => string.IsNullOrWhiteSpace(Usuarios[0]) || (Direcciones[2] == -1);
+	private bool datosUsuEdit => string.IsNullOrWhiteSpace(Usuarios[1]) || (Direcciones[3] == -1) || string.IsNullOrWhiteSpace(Usuarios[2]);
+	private bool datosEtiq => !string.IsNullOrWhiteSpace(Etiquetas[0]);
+	private bool datosEtiqEdit => !string.IsNullOrWhiteSpace(Etiquetas[1]) && !string.IsNullOrWhiteSpace(Etiquetas[2]);
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		ListaDirecciones = await direccionesService.ObtenerDirecciones();
+		ListaDepartamentos = await departamentosService.BuscarDepartamentos();
+		ListaUsuarios = await usuariosService.BuscarUsuarios();
+		ListaEtiquetas = await etiquetasService.ObtenerEtiquetas();
+	}
+
+
+	private async Task AgregarDepartamento()
+	{
+		await departamentosService.AgregarDepartamento(ListaDirecciones.Where(d => d.Id == Direcciones[0]).First().NombreDir, Departamentos[0]);
+		Direcciones[0] = -1; Departamentos[0] = "";
+		confirmar = true;
+	}
+
+	private async Task EditarDepartamento()
+	{
+		var dep = ListaDepartamentos.FirstOrDefault(d => d.NombreDep == Departamentos[1]);
+		dep.NombreDep = Departamentos[2];
+		dep.Direccion = ListaDirecciones.Where(d => d.Id == Direcciones[1]).First();
+		await departamentosService.ModificarDepartamento(dep);
+		Direcciones[1] = -1; Departamentos[1] = ""; Departamentos[2] = "";
+		confirmar = true;
+	}
+
+	private async Task AgregarUsuario()
+	{
+		await usuariosService.AgregarUsuario(ListaDirecciones.Where(d => d.Id == Direcciones[2]).First().NombreDir, Usuarios[0]);
+		Direcciones[2] = -1; Usuarios[0] = "";
+		confirmar = true;
+	}
+
+	private async Task EditarUsuario()
+	{
+		var user = ListaUsuarios.FirstOrDefault(u => u.User == Usuarios[1]);
+		user.User = Usuarios[2];
+		user.Direccion = ListaDirecciones.Where(d => d.Id == Direcciones[3]).First();
+		await usuariosService.ModificarUsuario(user);
+		Direcciones[3] = -1; Usuarios[1] = ""; Usuarios[2] = "";
+		confirmar = true;
+	}
+
+	private async Task AgregarEtiqueta()
+	{
+		if (ListaEtiquetas.Any(e => e.Texto == "--"))
+		{
+			var et = ListaEtiquetas.FirstOrDefault(e => e.Texto == "--");
+			et.Texto = Etiquetas[0];
+			await etiquetasService.ModificarEtiqueta(et);
+		}
+		else
+			await etiquetasService.AgregarEtiqueta(new Etiqueta (Etiquetas[0]));
+		Etiquetas[0] = "";
+		confirmar = true;
+	}
+
+	private async Task EditarEtiqueta()
+	{
+		var et = ListaEtiquetas.FirstOrDefault(e => e.Texto == Etiquetas[1]);
+		et.Texto = Etiquetas[2];
+		await etiquetasService.ModificarEtiqueta(et);
+		Etiquetas[1] = "";
+		Etiquetas[2] = "";
+		confirmar = true;
+	}
+}

@@ -1,0 +1,185 @@
+﻿body {
+}
+
+h1 {
+    color: black;
+    text-align: center;
+}
+
+h2{
+    color: black;
+    padding-top: 60px;
+}
+
+h4 {
+    text-align: center;
+    font-weight: bold;
+}
+
+/* ==================================== filtro ======================================= */
+
+/* grid para las tarjetas del filtro */
+.grid-filtro{
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
+
+/* flex para los inputs */
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 8px;
+}
+
+/* diseno de la celda de filtro */
+.celda-filtro {
+    color: white;
+    background-color: #022e5e;
+    border: solid 4px white;
+    border-radius: 8px;
+    padding: 16px 16px;
+    align-items: center;
+    align-content: center;
+    transition: 0.2s;
+}
+
+/* diseno de los inputs */
+input {
+    color: white;
+    background-color: #000845;
+    border: solid 2px transparent;
+    border-radius: 8px;
+    width: 90%;
+    height: 40px;
+    padding: 0px 8px;
+    transition: 0.2s;
+}
+
+    input:hover {
+        border: solid 2px #ffa400;
+    }
+
+/* diseno del input de id */
+.id-cont {
+    width: 6rem;
+}
+
+/* diseno del input de las fechas */
+.date {
+    width: 8rem;
+}
+
+::deep input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* diseno del input select */
+::deep select {
+    color: white;
+    background-color: #000845;
+    border: solid 2px transparent;
+    border-radius: 8px;
+    padding: 0px 8px;
+    transition: 0.2s;
+}
+
+    ::deep select:hover {
+        border: solid 2px #ffa400;
+    }
+    
+/* diseno del boton de buscar */
+.buscar {
+    width: 2.4rem;
+    background-color: #1e1e1e;
+    border: solid 2px #5f5f5f;
+    border-radius: 8px;
+}
+
+    .buscar:hover {
+        background-color: #646464;
+        border: solid 2px #ffa400;
+    }
+
+/* ===================================== hoja ========================================*/
+
+/* grid para la hoja */
+.grid-hoja {
+    display: grid;
+    grid-template-rows: repeat(4, auto);
+    padding: 16px 0px;
+}
+
+/* grid para los servicios */
+.grid-servs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* grid para agrupar por fila los campos */
+.fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+/* diseno de las celdas de la hoja */
+.celda {
+    color: white;
+    background-color: #022e5e;
+    border: solid 1px cyan;
+    padding: 8px;
+}
+
+/* centrado de la palbra tipo de servicio en la hoja */
+.centro {
+    text-align: center;
+}
+
+/* grid para los botones inferiores */
+.grid-menu{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 10px;
+}
+
+/* diseno de los botones del listado */
+.boton-lista {
+    background-color: #103787;
+    border-radius: 8px;
+    width: 40px;
+    padding: 0px;
+}
+
+    .boton-lista:hover {
+        background-color: #005fc6;
+    }
+
+    .boton-lista:disabled {
+        background-color: #646464;
+    }
+
+/* diseno de la casilla del indice */
+.numero {
+    color: white;
+    background-color: #022e5e;
+    border: solid 2px #005fc6;
+    border-radius: 4px;
+    text-align: center;
+    align-items: center;
+    padding: 0px 8px;
+}
+
+/* diseno del boton del pdf */
+.pdf {
+    background-color: #8d6300;
+    border-radius: 8px;
+}
+
+    .pdf:hover {
+        background-color: #c48a00;
+    }
+
+    .pdf:active {
+        background-color: #8d6300;
+    }

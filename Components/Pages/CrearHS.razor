@@ -1,0 +1,245 @@
+﻿@page "/"
+@using SistemaDeServicios.Modelos
+@using SistemaDeServicios.Data
+@inject DireccionesService direccionesService
+@inject TipoServicioService tipoServicioService
+@inject HojaServicioService hojaServicioService
+@inject DepartamentosService departamentoService
+@inject UsuariosService usuariosService
+
+<PageTitle>Hojas De Servicios</PageTitle>
+
+<h1><strong>Crear Hoja De Servicio #@(Id_actual)</strong></h1>
+
+
+<EditForm Model="@Hoja" OnValidSubmit="GuardarHoja">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="">
+        <div class="grid-up">
+
+            <div class="grid-area area">
+	            <h3><strong>Fecha</strong></h3>
+
+                <div class="inp txt">
+                    <InputDate @bind-Value="Hoja.Fecha" class="inp date"/>
+                </div>
+            </div>
+
+
+            
+            <div class="grid-area area">
+                <h3><strong>Nombre</strong></h3>
+
+                <InputText class="inp txt" @bind-Value="Hoja.Nombre"/>
+            </div>
+
+
+
+            <div class="grid-area area">
+                <h3><strong>Dirección</strong></h3>
+
+                <InputSelect class="inp slct" @bind-Value="Hoja.Direccion" onclick="OnDireccionChanged">
+                    <option value="">Seleccione una dirección</option>
+                    @foreach (var direccion in ListaDirecciones)
+                    {
+                        <option value="@direccion.NombreDir">@direccion.NombreDir</option>
+		            }  
+                </InputSelect>
+            </div>
+
+
+
+            <div class="grid-area area">
+                <h3><strong>Departamento</strong></h3>
+
+                <InputSelect class="inp slct" @bind-Value="Hoja.Departamento">
+                    <option value="Ninguno">Ningún departamento</option>
+                    @foreach (var departamento in DepartamentosFiltrados)
+                    {
+                        <option value="@departamento.NombreDep">(@departamento.Direccion.NombreDir) @departamento.NombreDep</option>
+                    }
+                </InputSelect>
+            </div>
+
+
+       
+            <div class="grid-area area">
+                <h3><strong>Usuario</strong></h3>
+
+                <div class="contenido">
+                    <InputText class="user inp txt" @bind-Value="Hoja.Usuario" />
+
+                    <InputSelect class="user inp slct" @bind-Value="Hoja.Usuario" placeholder=" ">
+                        <option value="Ninguno"></option>
+                        @foreach (var users in UsuariosFiltrados)
+                        {
+                            <option value="@users.User">(@users.Direccion.NombreDir) @users.User</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+
+
+            <div class="grid-area area">
+                <h3><strong>Equipo</strong></h3>
+
+                <InputText class="inp txt" @bind-Value="Hoja.Caracteristicas" />
+            </div>
+        </div>
+
+
+        <div class="grid-area area">
+            <h3><strong>Tipo De Servicio</strong></h3>
+
+            <div class="grid-mid">
+                @foreach (var (s, index) in TiposFiltrados.Select((s, i) => (s, i)))
+                {
+                    <div class="serv">
+             
+                        <InputCheckbox class="box" @bind-Value="@ServiciosSeleccionados[index]" />
+                        <label>@s.Texto</label>
+                    </div>
+                }
+
+                <div class="serv">
+                    <InputCheckbox class="box" @bind-Value="@otroServicioBool" />
+                    <label>Otro: </label>
+                    <InputText class="otroServ" @bind-Value="otroServicio" />
+                </div>
+            </div>
+
+            
+        </div>
+
+
+        <div class="grid-down">
+
+            <div class="grid-area area">
+                <h3><strong>Descripción</strong></h3>
+
+                <InputTextArea class="inp parr" @bind-Value="Hoja.Descripcion" />
+            </div>
+
+
+
+            <div class="grid-area area">
+                <h3><strong>Sugerencias</strong></h3>
+
+                <InputTextArea class="inp parr" @bind-Value="Hoja.Sugerencias" />
+            </div>
+        </div>
+    </div>
+
+    <div class="contenedor-flex">
+        <button class="boton save" type="submit" disabled="@(!datosImportantes)">Guardar</button>
+		<button class="boton pdf" type="button" @onclick="RecrearPDF" disabled="@(!hayRespaldo)">Recrear PDF</button>
+    </div>
+</EditForm>
+
+
+@code {
+
+    HojaServicio Hoja = new HojaServicio(), HojaRespaldo = new HojaServicio();
+    List<Direcciones> ListaDirecciones = new();
+    List<TipoServicio> ListaTipos = new();
+    List<TipoServicio> TiposFiltrados = new();
+    private bool datosImportantes => !string.IsNullOrWhiteSpace(Hoja.Nombre) && !string.IsNullOrEmpty(Hoja.Direccion) && ((!otroServicioBool && ServiciosSeleccionados.ContainsValue(true)) || (otroServicioBool && !string.IsNullOrWhiteSpace(otroServicio))) && !string.IsNullOrEmpty(Hoja.Descripcion);
+
+    private List<Departamentos> DepartamentosFiltrados = new();
+    private List<Usuarios> UsuariosFiltrados = new();
+
+    Random rnd = new Random();
+    Dictionary<int, bool> ServiciosSeleccionados = new Dictionary<int, bool>() { { 0, false } };
+    int index, Id_actual;
+    bool otroServicioBool = false, hayRespaldo = false;
+    string otroServicio = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Id_actual = await hojaServicioService.ContarHojas() + 1;
+        ListaDirecciones = await direccionesService.ObtenerDirecciones();
+        DepartamentosFiltrados = await departamentoService.BuscarDepartamentos();
+        UsuariosFiltrados = await usuariosService.BuscarUsuarios();
+        ListaTipos = await tipoServicioService.ObtenerTiposServicio();
+        TiposFiltrados = ListaTipos.Where(s => s.Recurrente).ToList();
+        foreach (var x in TiposFiltrados)
+        {
+            ServiciosSeleccionados[x.Id] = false;
+
+        }
+        Hoja.Fecha = DateTime.Today;
+    }
+
+    // sin uso
+    void ColocarFechaActual()
+    {
+        Hoja.Fecha = DateTime.Today;
+    }
+
+    // sin uso
+    private async Task OnDireccionChanged(ChangeEventArgs e)
+    {
+        DepartamentosFiltrados = await departamentoService.BuscarDepartamentos();
+        UsuariosFiltrados = await usuariosService.BuscarUsuarios();
+        Hoja.Departamento = string.Empty;
+        Hoja.Usuario = string.Empty;
+    }
+
+    // sin uso
+    async Task ObtenerDirecciones()
+    {
+        ListaDirecciones = await direccionesService.ObtenerDirecciones();
+        ListaTipos = await tipoServicioService.ObtenerTiposServicio();
+    }
+
+    // Lee el arreglo de bools para marcar los servicios correspondientes en la hoja
+    private async Task DescifrarServicios()
+    {
+        TipoServicio otro = new();
+        foreach(var (s, index) in TiposFiltrados.Select((s, i) => (s, i)))
+        {
+            if (ServiciosSeleccionados[index])
+            {
+                Hoja.Servicios.Add(s);
+            }
+        }
+
+        if (otroServicioBool && !string.IsNullOrWhiteSpace(otroServicio))
+        {
+            otro = new TipoServicio { Texto = otroServicio, Recurrente = false };
+            if (!ListaTipos.Any(s => s.Texto.Equals(otroServicio, StringComparison.OrdinalIgnoreCase)))
+            {
+                await tipoServicioService.AgregarServicio(otro);
+            }
+
+            Hoja.Servicios.Add(otro);
+        }
+    }
+
+    // Guarda la hoja y genera el PDF
+    async Task GuardarHoja()
+    {
+        await DescifrarServicios();
+        Hoja.Etiquetas = new();
+        await hojaServicioService.Crear(Hoja);
+        HojaRespaldo = Hoja;
+        Task.Run(async () => { await hojaServicioService.GenerarPdf(HojaRespaldo, TiposFiltrados); });
+        Hoja = new HojaServicio();
+		hayRespaldo = true;
+		Hoja.Fecha = DateTime.Today;
+    }
+
+    // Crea un PDF para la hoja de respaldo
+    async Task RecrearPDF()
+    {
+        Task.Run(async () => { await hojaServicioService.GenerarPdf(HojaRespaldo, TiposFiltrados); });
+    }
+
+// Backup de la barra de arriba del mainlayout
+//<div class="top-row px-4">
+//            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+//        </div>
+}

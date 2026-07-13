@@ -1,0 +1,487 @@
+﻿html {
+    background-color: white;
+}
+
+h1 {
+    color: black;
+    text-align: center;
+}
+
+/* =============================== Grid de filtro y calendario =================================== */
+
+.filtro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0px;
+}
+
+/* ================================ Texto e inputs del filtro ===================================== */
+
+/* grid principal del filtro */
+.filtro {
+    display: grid;
+    margin: 0px auto;
+    grid-template-rows: auto;
+    row-gap: 0px;
+    min-width: 0;
+}
+
+/* grid secundario para los textos del filtro */
+.filtro-grid-textos {
+    padding-bottom: 0px;
+}
+
+/* diseno de la celda del filtro */
+.celda-filtro {
+    color: white;
+    background-color: #022e5e;
+    border: solid 2px cyan;
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* formato de los label del filtro */
+.filtro label {
+    font-size: 18px;
+    color: white;
+    margin-right: 10px;
+}
+
+/* diseño de los contadores */
+.filtro input {
+    color: white;
+    padding: 0px;
+    text-align: center;
+    font-size: 16px;
+    height: 30px;
+    background-color: #000845;
+    border: solid 2px transparent;
+    border-radius: 8px;
+    transition: 0.15s;
+}
+    .filtro input:hover {
+        border: solid 2px #ffa400;
+    }
+    .filtro input:invalid {
+        border: solid 2px red; 
+    }
+
+/* contador de mes */
+.filtro .mes {
+    width: 40px;
+}
+
+/* contador de años */
+.filtro .ano {
+    width: 60px;
+}
+
+/* grid secundario para los botones del filtro */
+.filtro-grid-botones {
+    display: flex;
+    justify-content: center;
+    column-gap: 20px;
+    padding-bottom: 16px;
+}
+
+/* diseño de los botones del filtro */
+.filtro button {
+    color: white;
+    text-align: center;
+    background-color: #022e5e;
+    border: solid 1px black;
+    border-radius: 8px;
+    transition: 0.15s;
+}
+    .filtro button:hover {
+        background-color: #005cbf;
+        border: solid 1px white;
+        transform: scale(1.1);
+    }
+    .filtro button:active {
+        background-color: #000845;
+        border: solid 1px white;
+        transform: scale(0.85);
+    }
+
+/* diseño particular para el boton sumarizar */
+.filtro .boton-sum {
+    background-color: #8d6300;
+}
+
+    .filtro .boton-sum:hover {
+        background-color: #c48a00;
+        border: solid 1px white;
+        transform: scale(1.1);
+    }
+
+/* ================================= Calendario ====================================== */
+
+/* display para el calendario */
+.calendario {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+}
+
+/* grid para las celdas del calendario */
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 50px;
+    padding: 0px;
+}
+
+/* diseño de las celdas de los meses */
+.mes-celda {
+    font-size: 20px;
+    text-align: center;
+    color: white;
+    border: 2px solid black;
+    padding: 8px 8px;
+    align-items: center;
+    transition: 0.2s;
+}
+    
+    .mes-celda:hover {
+        transform: scale(1.1);
+        border: 2px solid #ffd17d;
+        color: #ffd17d;
+    }
+
+/* diseño mes futuro */
+.mes-futuro {
+    background-color: #1e1e1e;
+}
+
+/* diseño mes actual */
+.mes-actual {
+    background-color: #ffa400;
+}
+
+/* diseño mes pendiente */
+.mes-pendiente {
+    background-color: #646464;
+}
+
+/* diseño mes pendiente */
+.mes-incompleto {
+    background-color: #000845;
+}
+
+/* diseño mes completado */
+.mes-completo {
+    background-color: #004da1;
+}
+
+/* ============================= Listado de registros =================================== */
+
+/* Label de hojas no encontradas */
+.label-no-encontrado {
+    color: black;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* flex para el label-no-encontrado */
+.flex {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+/* grid del layout de los registros y las etiquetas */
+.layout {
+    display: grid;
+    grid-template-rows: repeat(auto-fit);
+}
+
+/* grid secundario para los servicios de un registro */
+.grid-servs {
+    display: grid;
+    grid-template-rows: repeat(auto-fit, 1fr);
+}
+
+/* encabezado de la lista de registros*/
+.encabezado {
+    color: black;
+    text-align: center;
+    border: solid 2px black;
+}
+
+.encabezado label {
+    color: black;
+}
+
+/* grid en columnas del registro */
+.registro-main {
+    display: grid;
+    grid-template-rows: 50px, auto;
+    font-size: 16px;
+    color: white;
+}
+
+/* grid interno en filas del registro */
+.registro-secundario {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+/* diseño de celda */
+.celda {
+    background-color: #022e5e;
+    border: solid 1px #00ffff;
+    padding: 8px;
+}
+
+/* celda par */
+.par .celda {
+    background-color: #022e5ee0;
+}
+
+/* celda impar */
+.impar .celda 
+{
+    background-color: #000845e0;
+}
+
+
+
+/* formato del texto etiqueta */
+.texto-etiqueta {
+    text-align: center;
+    align-content: center;
+}
+
+/* diseno etiqueta */
+::deep select.etiqueta {
+    border: solid 2px transparent;
+    border-radius: 8px;
+    height: 32px;
+    transition: 0.2s;
+}
+
+    ::deep select.etiqueta:hover {
+        border: solid 2px #ffa400;
+    }
+
+/* formato de los subtitulos de las etiquetas */
+.sub-titulo {
+    color: black;
+    font-size: 24px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* grid para las etiquetas de las hojas */
+.grid-etiquetas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 16px;
+    row-gap: 8px;
+    padding: 8px 0px;
+}
+
+/* diseño etiqueta */
+.etiqueta {
+    text-align: center;
+    color: white;
+    background-color: #0052ac;
+    border: solid 2px cyan;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+/* diseño etiqueta en memoria */
+.etiqueta-memoria {
+    background-color: #022e5e;
+    border: dashed 2px cyan;
+}
+
+/* grid para la seccion de los botones de etiquetado, listado y ver resultados */
+.grid-menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 24px;
+}
+
+/* contenedor para el boton resultados */
+.contenedor-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 16px;
+    padding-bottom: 64px;
+}
+
+/* diseño de boton de resultados */
+.boton {
+    color: white;
+    background-color: #103787;
+    border: 2px solid #808080;
+    border-radius: 8px;
+    padding: 0px;
+    transition: 0.15s;
+}
+
+    .boton:hover {
+        color: white;
+        transform: scale(1.2);
+        background-color: #005fc6;
+        border: 3px solid white;
+    }
+
+    .boton:active {
+        color: white;
+        transform: scale(0.85);
+        background-color: #000845;
+        border: 2px solid white;
+    }
+    
+/* grid para los botones de accion de la etiquetas */
+.grid-acciones {
+    display: grid;
+    grid-template-columns: 8fr 1fr 1fr;
+    column-gap: 0px;
+    padding: 0px;
+}
+
+/* diseno del cmapo select de los botones de etiquetado */
+::deep select {
+    color: white;
+    background-color: #646464;
+    border: solid 2px #515151;
+    border-radius: 8px 0px 0px 8px;
+    width: fit-content;
+    transition: 0.1s;
+}
+
+    ::deep select:hover {
+        border: solid 2px black;
+    }
+
+/* diseno de los botones de etiquetado */
+.boton-etiquetado {
+    color: #1cac00;
+    font-weight: 900;
+    background-color: #646464;
+    border: solid 2px #515151;
+    border-radius: 0px;
+    width: 2.3rem;
+    transition: 0.1s;
+}
+
+    .boton-etiquetado:hover {
+        border: solid 2px black;
+    }
+
+.boton-etiquetado2 {
+    font-size: 16px;
+    border-radius: 0px 8px 8px 0px;
+    width: 2.4rem;
+}
+
+/* grid de la seccion de la lista de hojas */
+.grid-listado {
+    display: flex;
+    justify-content: center;
+    column-gap: 8px;
+    padding: 0px;
+}
+
+/* formato de la celda numero */
+.numero {
+    color: white;
+    background-color: #022e5e;
+    border: solid 2px #005fc6;
+    border-radius: 4px;
+    text-align: center;
+    align-items: center;
+    padding: 2px 8px;
+}
+
+/* diseno del boton de la lista de registros */
+.boton-lista {
+    background-color: #103787;
+    width: 40px;
+    padding: 0px 0px;
+}
+
+    .boton-lista:hover {
+        background-color: #005fc6;
+    }
+
+    .boton-lista:disabled {
+        background-color: #646464;
+    }
+
+/* ===================================== Lista  de estadisticas etiquetas ================================= */
+
+/* bloque de cada direccion */
+.seccion-lista {
+    color: white;
+    background-color: #022e5ee0;
+    border: solid 4px #0094ff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-top: 20px;
+    width: 1fr;
+}
+
+/* Direccion de los resultados*/
+.direccion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Formato de la lista de etiquetas */
+.lista-etiquetas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(450px, 1fr));
+    grid-template-rows: repeat(auto-fit, 32px);
+    row-gap: 8px;
+    padding-bottom: 0px;
+}
+
+    .lista-etiquetas li {
+        color: white;
+        font-size: 20px;
+        padding: 0px 0px;
+        width: 100%;
+    }
+
+/* boton de volver de los resultados */
+.boton-volver {
+    color: #bbbbbb;
+    background-color: #103787;
+    border: 2px solid #808080;
+    border-radius: 8px;
+    width: 130px;
+    padding-top: 0px;
+    transition: 0.15s;
+}
+
+    .boton-volver:hover {
+        color: white;
+        transform: scale(1.2);
+        background-color: #005fc6;
+        border: 2px solid white;
+    }
+
+    .boton-volver:active {
+        color: white;
+        transform: scale(0.85);
+        background-color: #000845;
+        border: 2px solid white;
+    }
+
+.flex {
+    display: flex;
+    align-items: center;
+}
